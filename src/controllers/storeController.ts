@@ -143,21 +143,26 @@ export const updateStore = async (req: Request, res: Response) => {
 
     // Encontra a loja pelo ID
     const store = await Store.findById(id);
-    if (!store) return res.status(404).json({ message: "Loja não encontrada" });
+    if (!store) {
+      res.status(404).json({ message: "Loja não encontrada" });
+      return;
+    }
 
     // Se o CEP foi alterado, buscar o novo endereço e coordenadas
     if (cep && cep !== store.zip) {
       const address = await getAddressByCEP(cep);
-      if (!address)
-        return res.status(404).json({ message: "CEP não encontrado" });
+      if (!address) {
+        res.status(404).json({ message: "CEP não encontrado" });
+        return;
+      }
 
       const addressString = convertAddressToString(address);
       const coordinates = await getCoordinatesByAddress(addressString);
 
-      if (!coordinates)
-        return res
-          .status(500)
-          .json({ message: "Erro ao buscar as coordenadas" });
+      if (!coordinates) {
+        res.status(500).json({ message: "Erro ao buscar as coordenadas" });
+        return;
+      }
 
       store.zip = cep;
       store.street = address.street;
@@ -187,7 +192,10 @@ export const deleteStore = async (req: Request, res: Response) => {
 
     // Encontra e deleta a loja pelo ID
     const store = await Store.findByIdAndDelete(id);
-    if (!store) return res.status(404).json({ message: "Loja não encontrada" });
+    if (!store){
+        res.status(404).json({ message: "Loja não encontrada" });
+        return;
+    } 
 
     res.status(200).json({ message: "Loja deletada com sucesso" });
   } catch (error) {
