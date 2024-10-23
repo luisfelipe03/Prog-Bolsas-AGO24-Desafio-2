@@ -1,9 +1,12 @@
 import express from 'express';
+import storeRouter from './routes/storeRouter';
+import { convertAddressToString, getAddressByCEP } from './utils/viaCEP';
+import { getCoordinatesByAddress } from './utils/googleGeocoding';
 
 const app = express();
 
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
+app.use(express.json());
+
+app.use('/store', storeRouter);
 
 export default app;
