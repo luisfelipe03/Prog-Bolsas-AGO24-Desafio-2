@@ -3,8 +3,8 @@ import { convertAddressToString, getAddressByCEP } from "../utils/viaCEP";
 import { getCoordinatesByAddress } from "../utils/googleGeocoding";
 import { Store } from "../models/store";
 import { haversineDistance } from "../utils/haversine";
+import logger from "../utils/logger"; 
 
-// Função auxiliar para envio de respostas
 const handleResponse = (res: Response, statusCode: number, message: any) => {
   res.status(statusCode).json({ message });
 };
@@ -15,13 +15,18 @@ export const createStore = async (req: Request, res: Response) => {
     const { name, phone, cep } = req.body;
     const address = await getAddressByCEP(cep);
 
-    if (!address) return handleResponse(res, 404, "CEP não encontrado");
+    if (!address) {
+      logger.warn(`CEP não encontrado: ${cep}`);
+      return handleResponse(res, 404, "CEP não encontrado");
+    }
 
     const addressString = convertAddressToString(address);
     const coordinates = await getCoordinatesByAddress(addressString);
 
-    if (!coordinates)
+    if (!coordinates) {
+      logger.error("Erro ao buscar as coordenadas"); 
       return handleResponse(res, 500, "Erro ao buscar as coordenadas");
+    }
 
     const store = new Store({
       name,
@@ -32,9 +37,10 @@ export const createStore = async (req: Request, res: Response) => {
     });
 
     await store.save();
+    logger.info("Loja criada com sucesso", { store });
     res.status(201).json(store);
   } catch (error) {
-    console.error("Erro ao criar loja:", error);
+    logger.error("Erro ao criar loja:", error);
     handleResponse(res, 500, "Erro ao criar loja");
   }
 };
@@ -43,9 +49,10 @@ export const createStore = async (req: Request, res: Response) => {
 export const getStore = async (_req: Request, res: Response) => {
   try {
     const stores = await Store.find();
+    logger.info("Lojas recuperadas com sucesso", { count: stores.length });
     res.status(200).json({ count: stores.length, stores });
   } catch (error) {
-    console.error("Erro ao buscar lojas:", error);
+    logger.error("Erro ao buscar lojas:", error); 
     handleResponse(res, 500, "Erro ao buscar lojas");
   }
 };
@@ -54,11 +61,14 @@ export const getStore = async (_req: Request, res: Response) => {
 export const getStoreById = async (req: Request, res: Response) => {
   try {
     const store = await Store.findById(req.params.id).lean();
-    if (!store) return handleResponse(res, 404, "Loja não encontrada");
+    if (!store) {
+      logger.warn(`Loja não encontrada com ID: ${req.params.id}`); // Log de aviso
+      return handleResponse(res, 404, "Loja não encontrada");
+    }
 
     res.status(200).json(store);
   } catch (error) {
-    console.error("Erro ao buscar loja por ID:", error);
+    logger.error("Erro ao buscar loja por ID:", error); // Log de erro
     handleResponse(res, 500, "Erro ao buscar loja");
   }
 };
@@ -67,12 +77,15 @@ export const getStoreById = async (req: Request, res: Response) => {
 export const getStoreByState = async (req: Request, res: Response) => {
   try {
     const stores = await Store.find({ state: req.params.state });
-    if (stores.length === 0)
+    if (stores.length === 0) {
+      logger.warn(`Nenhuma loja encontrada no estado: ${req.params.state}`); // Log de aviso
       return handleResponse(res, 404, "Nenhuma loja encontrada nesse estado");
+    }
 
+    logger.info("Lojas recuperadas por estado com sucesso", { count: stores.length }); // Log de informação
     res.status(200).json({ count: stores.length, stores });
   } catch (error) {
-    console.error("Erro ao buscar lojas por estado:", error);
+    logger.error("Erro ao buscar lojas por estado:", error); // Log de erro
     handleResponse(res, 500, "Erro ao buscar lojas por estado");
   }
 };
@@ -83,17 +96,24 @@ export const getStoresNearby = async (req: Request, res: Response) => {
     const { cep } = req.params;
     const address = await getAddressByCEP(cep);
 
-    if (!address) return handleResponse(res, 404, "CEP não encontrado");
+    if (!address) {
+      logger.warn(`CEP não encontrado: ${cep}`); // Log de aviso
+      return handleResponse(res, 404, "CEP não encontrado");
+    }
 
     const addressString = convertAddressToString(address);
     const coordinates = await getCoordinatesByAddress(addressString);
 
-    if (!coordinates)
+    if (!coordinates) {
+      logger.error("Erro ao buscar as coordenadas"); // Log de erro
       return handleResponse(res, 500, "Erro ao buscar as coordenadas");
+    }
 
     const stores = await Store.find().lean();
-    if (!stores || stores.length === 0)
+    if (!stores || stores.length === 0) {
+      logger.warn("Lojas não encontradas"); // Log de aviso
       return handleResponse(res, 404, "Lojas não encontradas");
+    }
 
     const accessibleStores = stores
       .map((store) => {
@@ -117,20 +137,23 @@ export const getStoresNearby = async (req: Request, res: Response) => {
       })
       .filter((store) => parseFloat(store.distance) <= 100);
 
-    if (accessibleStores.length === 0)
+    if (accessibleStores.length === 0) {
+      logger.warn("Nenhuma loja acessível encontrada"); // Log de aviso
       return handleResponse(res, 404, "Nenhuma loja encontrada");
+    }
 
     accessibleStores.sort(
       (a, b) => parseFloat(a.distance) - parseFloat(b.distance)
     );
 
+    logger.info("Lojas acessíveis recuperadas com sucesso", { count: accessibleStores.length }); // Log de informação
     res.status(200).json({
       addressClient: address,
       count: accessibleStores.length,
       stores: accessibleStores,
     });
   } catch (error) {
-    console.error("Erro ao buscar lojas próximas:", error);
+    logger.error("Erro ao buscar lojas próximas:", error); // Log de erro
     handleResponse(res, 500, "Erro ao buscar lojas próximas");
   }
 };
@@ -144,24 +167,24 @@ export const updateStore = async (req: Request, res: Response) => {
     // Encontra a loja pelo ID
     const store = await Store.findById(id);
     if (!store) {
-      res.status(404).json({ message: "Loja não encontrada" });
-      return;
+      logger.warn(`Loja não encontrada com ID: ${id}`); // Log de aviso
+      return handleResponse(res, 404, "Loja não encontrada");
     }
 
     // Se o CEP foi alterado, buscar o novo endereço e coordenadas
     if (cep && cep !== store.zip) {
       const address = await getAddressByCEP(cep);
       if (!address) {
-        res.status(404).json({ message: "CEP não encontrado" });
-        return;
+        logger.warn(`CEP não encontrado: ${cep}`); // Log de aviso
+        return handleResponse(res, 404, "CEP não encontrado");
       }
 
       const addressString = convertAddressToString(address);
       const coordinates = await getCoordinatesByAddress(addressString);
 
       if (!coordinates) {
-        res.status(500).json({ message: "Erro ao buscar as coordenadas" });
-        return;
+        logger.error("Erro ao buscar as coordenadas"); // Log de erro
+        return handleResponse(res, 500, "Erro ao buscar as coordenadas");
       }
 
       store.zip = cep;
@@ -178,9 +201,10 @@ export const updateStore = async (req: Request, res: Response) => {
     if (phone) store.phone = phone;
 
     await store.save();
+    logger.info("Loja atualizada com sucesso", { store }); // Log de informação
     res.status(200).json({ message: "Loja atualizada com sucesso", store });
   } catch (error) {
-    console.error("Erro ao atualizar loja:", error);
+    logger.error("Erro ao atualizar loja:", error); // Log de erro
     res.status(500).json({ message: "Erro ao atualizar loja" });
   }
 };
@@ -192,14 +216,15 @@ export const deleteStore = async (req: Request, res: Response) => {
 
     // Encontra e deleta a loja pelo ID
     const store = await Store.findByIdAndDelete(id);
-    if (!store){
-        res.status(404).json({ message: "Loja não encontrada" });
-        return;
-    } 
+    if (!store) {
+      logger.warn(`Loja não encontrada para deletar com ID: ${id}`); // Log de aviso
+      return handleResponse(res, 404, "Loja não encontrada");
+    }
 
+    logger.info("Loja deletada com sucesso", { id }); // Log de informação
     res.status(200).json({ message: "Loja deletada com sucesso" });
   } catch (error) {
-    console.error("Erro ao deletar loja:", error);
+    logger.error("Erro ao deletar loja:", error); // Log de erro
     res.status(500).json({ message: "Erro ao deletar loja" });
   }
 };
