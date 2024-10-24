@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'; 
 import { ZodError, z } from 'zod';
+import logger from './logger';
 
 const viaCEPResponseSchema = z.object({
   cep: z.string(),
@@ -23,16 +24,29 @@ interface Address {
 export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
   const cleanedCep = cep.replace(/\D/g, '');
 
+  // Verifica se o CEP é válido
+  if (!cleanedCep || cleanedCep.length !== 8 || !/^\d{8}$/.test(cleanedCep)) {
+    logger.error('CEP inválido ou vazio');
+    return null; 
+  }
+
   try {
+    
     const response = await fetch(`https://viacep.com.br/ws/${cleanedCep}/json/`);
-    const data = await response.json();
 
-    const parsedData = viaCEPResponseSchema.parse(data);
-
-    if (parsedData.erro) {
-      console.error('CEP não encontrado');
+    if (!response.ok) {
+      logger.error(`Erro na requisição do ViaCEP: Status ${response.status}`);
       return null;
     }
+
+    const data = await response.json();
+
+    if (!data) {
+      logger.warn(`CEP não encontrado: ${cep}`);
+      return null;
+    }
+
+    const parsedData = viaCEPResponseSchema.parse(data);
 
     return {
       street: parsedData.logradouro,
@@ -43,13 +57,14 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
     };
   } catch (error) {
     if (error instanceof ZodError) {
-      console.error('Erro na validação dos dados da API:', error.errors);
+      logger.error('Erro na validação dos dados da API:', error.errors);
     } else {
-      console.error('Erro ao buscar o CEP:', error);
+      logger.error('Erro ao buscar o CEP:', error);
     }
     return null;
   }
 };
+
 
 export const convertAddressToString = (address: Address): string => {
   return `${address.street}, ${address.neighborhood}, ${address.city} - ${address.state}`;
