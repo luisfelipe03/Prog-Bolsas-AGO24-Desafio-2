@@ -29,8 +29,6 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
 
     const parsedData = viaCEPResponseSchema.parse(data);
 
-    //FIXME: Tratar CEPs que não possuem rua e bairro
-
     if (parsedData.erro) {
       console.error('CEP não encontrado');
       return null;
