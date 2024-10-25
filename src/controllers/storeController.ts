@@ -107,7 +107,13 @@ export const getStoreByState = async (req: Request, res: Response) => {
 // Obtém lojas próximas de um CEP com contagem
 export const getStoresNearby = async (req: Request, res: Response) => {
     try {
-        const { cep } = req.params;
+        const  cep  = req.params.cep;
+
+        if (!cep || cep.length < 8 || cep.length > 10) {
+            logger.warn("CEP inválido");
+            return handleResponse(res, 400, "CEP inválido");
+        }
+
         const address = await getAddressByCEP(cep);
 
         if (!address) {
