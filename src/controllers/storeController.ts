@@ -3,7 +3,7 @@ import { convertAddressToString, getAddressByCEP } from "../utils/viaCEP";
 import { getCoordinatesByAddress } from "../utils/googleGeocoding";
 import { Store } from "../models/store";
 import { haversineDistance } from "../utils/haversine";
-import logger from "../utils/logger";
+import logger from "../config/logger";
 
 const handleResponse = (res: Response, statusCode: number, message: any) => {
     res.status(statusCode).json({ message });
@@ -82,7 +82,8 @@ export const getStoreById = async (req: Request, res: Response) => {
 // Obtém lojas por estado com contagem
 export const getStoreByState = async (req: Request, res: Response) => {
     try {
-        const stores = await Store.find({ state: req.params.state });
+        const state = req.params.state.toUpperCase();
+        const stores = await Store.find({ state }).lean();
         if (stores.length === 0) {
             logger.warn(
                 `Nenhuma loja encontrada no estado: ${req.params.state}`
@@ -107,7 +108,7 @@ export const getStoreByState = async (req: Request, res: Response) => {
 // Obtém lojas próximas de um CEP com contagem
 export const getStoresNearby = async (req: Request, res: Response) => {
     try {
-        const  cep  = req.params.cep;
+        const cep = req.params.cep;
 
         if (!cep || cep.length < 8 || cep.length > 10) {
             logger.warn("CEP inválido");

@@ -1,7 +1,6 @@
 import app from "./app";
-import { env } from "./env";
+import { env } from "./config/env";
 import connect from "./db/connection";
-
 
 app.listen(env.PORT, () => {
     connect();
