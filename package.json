@@ -1,34 +1,33 @@
 {
-  "name": "prog-bolsas-ago24-desafio-2",
+  "name": "desafio_uol_melhorado",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "start": "node build/server.js",
-    "build": "tsup src --out-dir build",
+    "dev": "tsx watch src/infra/http/express/server.ts",
+    "start": "node build/infra/http/express/server.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "description": "",
   "devDependencies": {
+    "@types/node": "^22.7.9",
+    "@types/swagger-ui-express": "^4.1.6",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.7.7",
-    "@types/supertest": "^6.0.2",
-    "supertest": "^7.0.0",
-    "tsup": "^8.3.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3",
     "vitest": "^2.1.3",
     "winston": "^3.15.0"
   },
   "dependencies": {
+    "swagger-ui-express": "^5.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "mongoose": "^8.7.2",
+    "mongodb": "^6.10.0",
     "node-fetch": "^3.3.2",
+    "sqlite3": "^5.1.7",
     "zod": "^3.23.8"
   }
 }
