@@ -1,0 +1,388 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Physical Store API",
+        "version": "1.0.0",
+        "description": "Documentation of Physical Store API",
+        "contact": {
+            "name": "API Support",
+            "email": "luis.oliveira.pb@compasso.com.br"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/stores/create": {
+            "post": {
+                "summary": "Create a new store",
+                "description": "Creates a new store in the system",
+                "requestBody": {
+                    "description": "Store data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string" },
+                                    "phone": { "type": "string" },
+                                    "zip": { "type": "string" }
+                                },
+                                "required": ["name", "phone", "zip"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Store created successfully"
+                    },
+                    "500": {
+                        "description": "Error creating store"
+                    }
+                }
+            }
+        },
+        "/stores": {
+            "get": {
+                "summary": "List all stores",
+                "description": "Retrieves a list of all stores",
+                "responses": {
+                    "200": {
+                        "description": "List of stores",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "count": 2,
+                                    "stores": [
+                                        {
+                                            "id": "e023e06a-3130-40de-b653-8a4a792846b4",
+                                            "name": "Store Doc 1",
+                                            "phone": "(11) 1234-5678",
+                                            "address": {
+                                                "street": "Av. Paulista",
+                                                "city": "São Paulo",
+                                                "neighborhood": "Bela Vista",
+                                                "state": "SP",
+                                                "zip": "12345-678",
+                                                "latLng": {
+                                                    "lat": -23.5505,
+                                                    "lng": -46.6333
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "e023e06a-3130-40de-b653-8a4a792846b4",
+                                            "name": "Store Doc 2",
+                                            "phone": "(11) 1234-5678",
+                                            "address": {
+                                                "street": "Av. Paulista",
+                                                "city": "São Paulo",
+                                                "neighborhood": "Bela Vista",
+                                                "state": "SP",
+                                                "zip": "12345-678",
+                                                "latLng": {
+                                                    "lat": -23.5505,
+                                                    "lng": -46.6333
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No stores found",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Nenhuma loja encontrada"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error fetching stores",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Erro ao buscar lojas"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/{id}": {
+            "get": {
+                "summary": "Find store by ID",
+                "description": "Find a store by its ID",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "ID of the store to find"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Store details",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "id": "e023e06a-3130-40de-b653-8a4a792846b4",
+                                    "name": "Store Doc",
+                                    "phone": "(11) 1234-5678",
+                                    "address": {
+                                        "street": "Av. Paulista",
+                                        "city": "São Paulo",
+                                        "neighborhood": "Bela Vista",
+                                        "state": "SP",
+                                        "zip": "12345-678",
+                                        "latLng": {
+                                            "lat": -23.5505,
+                                            "lng": -46.6333
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Store not found",
+                        "content": {
+                            "application/json": {
+                                "example": { "message": "Loja não encontrada" }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/state/{state}": {
+            "get": {
+                "summary": "Find stores by state",
+                "description": "Retrieve stores located in a specific state",
+                "parameters": [
+                    {
+                        "name": "state",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "State to filter stores"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of stores in the state",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "count": 2,
+                                    "stores": [
+                                        {
+                                            "id": "e023e06a-3130-40de-b653-8a4a792846b4",
+                                            "name": "Store Doc 1",
+                                            "phone": "(11) 1234-5678",
+                                            "address": {
+                                                "street": "Av. Paulista",
+                                                "city": "São Paulo",
+                                                "neighborhood": "Bela Vista",
+                                                "state": "SP",
+                                                "zip": "12345-678",
+                                                "latLng": {
+                                                    "lat": -23.5505,
+                                                    "lng": -46.6333
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "e023e06a-3130-40de-b653-8a4a792846b4",
+                                            "name": "Store Doc 2",
+                                            "phone": "(11) 1234-5678",
+                                            "address": {
+                                                "street": "Av. Paulista",
+                                                "city": "São Paulo",
+                                                "neighborhood": "Bela Vista",
+                                                "state": "SP",
+                                                "zip": "12345-678",
+                                                "latLng": {
+                                                    "lat": -23.5505,
+                                                    "lng": -46.6333
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No stores found in the state",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Nenhuma loja encontrada nesse estado"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/nearby/{zip}": {
+            "get": {
+                "summary": "Find nearby stores by ZIP code",
+                "description": "Retrieve stores close to a specific ZIP code",
+                "parameters": [
+                    {
+                        "name": "zip",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "ZIP code to search nearby stores"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of nearby stores",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "count": 1,
+                                    "stores": [
+                                        {
+                                            "name": "Store Doc",
+                                            "phone": "(11) 1234-5678",
+                                            "street": "Av. Paulista",
+                                            "neighborhood": "Bela Vista",
+                                            "city": "São Paulo",
+                                            "state": "SP",
+                                            "zip": "12345-678",
+                                            "distance": "2.5 km"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No nearby stores found",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Nenhuma loja encontrada"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/update/{id}": {
+            "put": {
+                "summary": "Update store information",
+                "description": "Update the details of an existing store",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "ID of the store to update"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Store data to update",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string" },
+                                    "phone": { "type": "string" },
+                                    "zip": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Store updated successfully",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Store updated successfully",
+                                    "store": {
+                                        "id": "e023e06a-3130-40de-b653-8a4a792846b4",
+                                            "name": "Store Doc Updated",
+                                            "phone": "(11) 1234-5678",
+                                            "address": {
+                                                "street": "Av. Paulista",
+                                                "city": "São Paulo",
+                                                "neighborhood": "Bela Vista",
+                                                "state": "SP",
+                                                "zip": "12345-678",
+                                                "latLng": {
+                                                    "lat": -23.5505,
+                                                    "lng": -46.6333
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error updating store",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Erro ao atualizar loja"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/delete/{id}": {
+            "delete": {
+                "summary": "Delete a store",
+                "description": "Remove a store from the system by ID",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the store to delete"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Store deleted successfully"
+                    },
+                    "400": {
+                        "description": "Error deleting store"
+                    },
+                    "500": {
+                        "description": "Error deleting store"
+                    }
+                }
+            }
+        }
+    }
+}
