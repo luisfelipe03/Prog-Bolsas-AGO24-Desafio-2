@@ -1,4 +1,5 @@
 import { StoreRepositoryInterface } from "../../../domain/store/store.repository";
+import logger from "../../../infra/config/logger";
 import { getAddressByCEP } from "../../../infra/http/external/viaCEP";
 import { FindStoreNearbyOutput } from "../dto/find-store-nearby-output.dto";
 import { AddressNotFoundError } from "./errors/address-not-found-error";
@@ -10,6 +11,7 @@ export class FetchStoresNearbyUseCase {
         const addressClient = await getAddressByCEP(zip);
 
         if (!addressClient) {
+            logger.error("Address not found");
             throw new AddressNotFoundError();
         }
 

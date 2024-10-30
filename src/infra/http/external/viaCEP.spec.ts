@@ -18,7 +18,7 @@ describe("viaCEP", () => {
     });
 
     //TODO: Melhorar a exceção
-    it.skip("should return null if the CEP is not found", async () => {
+    it("should return null if the CEP is not found", async () => {
         const address = await getAddressByCEP("55415001");
         expect(address).toBeNull();
     });

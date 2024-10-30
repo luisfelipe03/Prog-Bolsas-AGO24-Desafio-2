@@ -37,7 +37,7 @@ export class StoreController {
             handleResponse(res, 201, "Store created successfully");
         } catch (error) {
             const err = error as Error;
-            logger.error("Erro ao criar loja:", err);
+            logger.error("Error creating store:", err);
             handleResponse(res, 500, err.message);
         }
     }
@@ -45,7 +45,9 @@ export class StoreController {
     async listAllStore(req: Request, res: Response) {
         try {
             const listAllStoreUseCase = new FetchStoresUseCase(this.repository);
-            const page = req.query.page ? parseInt(req.query.page as string) : undefined;
+            const page = req.query.page
+                ? parseInt(req.query.page as string)
+                : undefined;
             const output = await listAllStoreUseCase.execute(page);
 
             if (output.length === 0) {
@@ -53,13 +55,13 @@ export class StoreController {
                 return;
             }
 
-            logger.info("Lojas recuperadas com sucesso", {
+            logger.info("Stores retrieved successfully", {
                 count: output.length,
             });
             res.status(200).json({ count: output.length, stores: output });
         } catch (error) {
-            logger.error("Erro ao buscar lojas:", error);
-            handleResponse(res, 500, "Erro ao buscar lojas");
+            logger.error("Error fetching stores:", error);
+            handleResponse(res, 500, "Error fetching stores");
         }
     }
 
@@ -68,14 +70,14 @@ export class StoreController {
             const findByIdUseCase = new GetStoreByIdUseCase(this.repository);
             const store = await findByIdUseCase.execute(req.params.id);
             if (!store) {
-                logger.warn(`Loja não encontrada com ID: ${req.params.id}`);
-                return handleResponse(res, 404, "Loja não encontrada");
+                logger.warn(`Store not found with ID: ${req.params.id}`);
+                return handleResponse(res, 404, "Store not found");
             }
 
             res.status(200).json(store);
         } catch (error) {
-            logger.error("Erro ao buscar loja por ID:", error);
-            handleResponse(res, 500, "Erro ao buscar loja");
+            logger.error("Error fetching store by ID:", error);
+            handleResponse(res, 500, "Error fetching store");
         }
     }
 
@@ -88,21 +90,21 @@ export class StoreController {
             const stores = await findStoreByStateUseCase.execute(state);
 
             if (!stores || stores.length === 0) {
-                logger.warn(`Nenhuma loja encontrada no estado: ${state}`);
+                logger.warn(`No stores found in state: ${state}`);
                 return handleResponse(
                     res,
                     404,
-                    "Nenhuma loja encontrada nesse estado"
+                    "No stores found in this state"
                 );
             }
 
-            logger.info("Lojas recuperadas por estado com sucesso", {
+            logger.info("Stores retrieved by state successfully", {
                 count: stores.length,
             });
             res.status(200).json({ count: stores.length, stores });
         } catch (error) {
-            logger.error("Erro ao buscar lojas por estado:", error);
-            handleResponse(res, 500, "Erro ao buscar lojas por estado");
+            logger.error("Error fetching stores by state:", error);
+            handleResponse(res, 500, "Error fetching stores by state");
         }
     }
 
@@ -114,18 +116,18 @@ export class StoreController {
             const output = await findStoreNearbyUseCase.execute(req.params.zip);
 
             if (output.count === 0) {
-                logger.warn("Nenhuma loja acessível encontrada");
-                return handleResponse(res, 404, "Nenhuma loja encontrada");
+                logger.warn("No accessible stores found");
+                return handleResponse(res, 404, "No stores found");
             }
 
-            logger.info("Lojas acessíveis recuperadas com sucesso", {
+            logger.info("Accessible stores retrieved successfully", {
                 count: output.count,
             });
 
             res.status(200).json(output);
         } catch (error) {
-            logger.error("Erro ao buscar lojas próximas:", error);
-            handleResponse(res, 500, "Erro ao buscar lojas próximas");
+            logger.error("Invalid Zip. Please provide a valid zip code.");
+            handleResponse(res, 500, "Invalid Zip. Please provide a valid zip code.");
         }
     }
 
@@ -146,8 +148,8 @@ export class StoreController {
                 store: output,
             });
         } catch (error) {
-            logger.error("Erro ao atualizar loja:", error);
-            handleResponse(res, 500, "Erro ao atualizar loja");
+            logger.error("Error updating store:", error);
+            handleResponse(res, 500, "Error updating store");
         }
     }
 
@@ -156,11 +158,11 @@ export class StoreController {
             const id = req.params.id;
             const deleteStoreUseCase = new DeleteStoreUseCase(this.repository);
             await deleteStoreUseCase.execute(id);
-            logger.info("Loja deletada com sucesso", { id });
+            logger.info("Store deleted successfully", { id });
             handleResponse(res, 200, "Store deleted successfully");
         } catch (error) {
             const err = error as Error;
-            logger.error("Erro ao deletar loja:", err);
+            logger.error("Error deleting store:", err);
             handleResponse(res, 400, err.message);
         }
     }

@@ -24,10 +24,8 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
     }
 
     try {
-        const response = await fetch(
-            `https://viacep.com.br/ws/${cleanedCep}/json/`
-        );
-
+        const response = await fetch(`https://viacep.com.br/ws/${cleanedCep}/json/`);
+        
         if (!response.ok) {
             logger.error(`Error in ViaCEP request: Status ${response.status}`);
             throw new Error("Error fetching CEP with ViaCEP API");
@@ -35,9 +33,10 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
 
         const data = await response.json();
 
-        if (!data) {
+        // Verificação de tipo e presença de "erro"
+        if (typeof data === "object" && data !== null && "erro" in data && data.erro === true) {
             logger.warn(`CEP not found: ${cep}`);
-            throw new Error("CEP not found");
+            return null;
         }
 
         const parsedData = viaCEPResponseSchema.parse(data);
@@ -48,10 +47,7 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
             city: parsedData.localidade,
             state: parsedData.uf,
             zip: parsedData.cep,
-            latLng: {
-                lat: 0,
-                lng: 0,
-            },
+            latLng: { lat: 0, lng: 0 },
         };
 
         const addressString = convertAddressToString(addressToConvert);
@@ -59,9 +55,7 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
         const latLng = await getCoordinatesByAddress(addressString);
 
         if (!latLng) {
-            throw new Error(
-                `Coordinates not found for address: ${addressString}`
-            );
+            throw new Error(`Coordinates not found for address: ${addressString}`);
         }
 
         return {
@@ -73,14 +67,12 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
             latLng,
         };
     } catch (error) {
-        if (error instanceof Error) {
-            logger.error("Error validating API data:", error);
-        } else {
-            logger.error("Error fetching CEP:", error);
-        }
+        logger.error(`Error searching for nearby stores`);
         return null;
     }
 };
+
+
 
 export const convertAddressToString = (address: Address): string => {
     return `${address.street}, ${address.neighborhood}, ${address.city} - ${address.state}`;
