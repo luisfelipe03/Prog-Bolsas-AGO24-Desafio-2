@@ -1,5 +1,4 @@
 import { config } from "dotenv";
-import { z } from "zod";
 import logger from "../logger";
 
 if (process.env.NODE_ENV === "test") {
@@ -8,31 +7,39 @@ if (process.env.NODE_ENV === "test") {
     config();
 }
 
-const envSchema = z.object({
-    NODE_ENV: z
-        .enum(["development", "production", "test"])
-        .default("development"),
-    DATABASE_URL: z.string(),
-    PORT: z.coerce.number().default(3333),
-    GOOGLE_API_KEY: z.string(),
-});
-
-const _env = envSchema.safeParse(process.env);
-
-if (_env.success === false) {
-    if (process.env.NODE_ENV === "test") {
-        throw new Error(
-            `Erro ao validar variáveis de ambiente: ${JSON.stringify(
-                _env.error.errors
-            )}`
-        );
-    } else {
-        logger.error(
-            "Erro ao validar variáveis de ambiente:",
-            _env.error.errors
-        );
-        process.exit(1); 
+function validateEnv() {
+    const NODE_ENV = process.env.NODE_ENV || "development";
+    if (!["development", "production", "test"].includes(NODE_ENV)) {
+        logger.error(`NODE_ENV inválido: ${NODE_ENV}`);
+        process.exit(1);
     }
+
+    const DATABASE_URL = process.env.DATABASE_URL;
+    if (!DATABASE_URL) {
+        logger.error("DATABASE_URL não definida");
+        process.exit(1);
+    }
+
+    const PORT = Number(process.env.PORT) || 3333;
+    if (isNaN(PORT)) {
+        logger.error("PORT deve ser um número");
+        process.exit(1);
+    }
+
+    const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+    if (!GOOGLE_API_KEY) {
+        logger.error("GOOGLE_API_KEY não definida");
+        process.exit(1);
+    }
+
+    return {
+        NODE_ENV,
+        DATABASE_URL,
+        PORT,
+        GOOGLE_API_KEY,
+    };
 }
 
-export const env = _env.data;
+const env = validateEnv();
+
+export { env };
