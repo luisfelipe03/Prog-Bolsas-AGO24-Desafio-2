@@ -17,7 +17,7 @@ export class StoreInMemoryRepository implements StoreRepositoryInterface {
         const startIndex = (currentPage - 1) * currentLimit;
         const endIndex = startIndex + currentLimit;
     
-        return this.stores.slice(startIndex, endIndex);
+        return page ? this.stores.slice(startIndex, endIndex): this.stores;
     }
     
 
