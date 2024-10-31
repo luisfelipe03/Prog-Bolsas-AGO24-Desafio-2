@@ -5,8 +5,8 @@ import { CreateStoreOutput } from "../dto/create-store-output.dto";
 export class FetchStoresUseCase {
     constructor(private repository: StoreRepositoryInterface) {}
 
-    async execute(page?: number): Promise<CreateStoreOutput[]> {
-        const stores = await this.repository.findAll(page);
+    async execute(page?: number, limit?: number): Promise<CreateStoreOutput[]> {
+        const stores = await this.repository.findAll(page, limit);
         return stores.map((store: Store) => store.toJSON());
     }
 }

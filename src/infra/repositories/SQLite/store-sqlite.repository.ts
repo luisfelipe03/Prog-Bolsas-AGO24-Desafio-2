@@ -65,11 +65,12 @@ export class StoreSqliteRepository implements StoreRepositoryInterface {
         );
     }
 
-    async findAll(page?: number): Promise<Store[]> {
-        const ITEMS_PER_PAGE = 10;
+    async findAll(page?: number, limit?: number): Promise<Store[]> {
+        const currentPage = page || 1; 
+        const currentLimit = limit || 10; 
     
         const query = page
-            ? `SELECT * FROM Store LIMIT ${ITEMS_PER_PAGE} OFFSET ${(page - 1) * ITEMS_PER_PAGE};`
+            ? `SELECT * FROM Store LIMIT ${currentLimit} OFFSET ${(currentPage - 1) * currentLimit};`
             : `SELECT * FROM Store;`;
     
         return new Promise((resolve, reject) => {

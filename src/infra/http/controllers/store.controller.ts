@@ -48,7 +48,8 @@ export class StoreController {
             const page = req.query.page
                 ? parseInt(req.query.page as string)
                 : undefined;
-            const output = await listAllStoreUseCase.execute(page);
+            const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+            const output = await listAllStoreUseCase.execute(page, limit);
 
             if (output.length === 0) {
                 handleResponse(res, 404, "No stores found");
@@ -127,7 +128,11 @@ export class StoreController {
             res.status(200).json(output);
         } catch (error) {
             logger.error("Invalid Zip. Please provide a valid zip code.");
-            handleResponse(res, 500, "Invalid Zip. Please provide a valid zip code.");
+            handleResponse(
+                res,
+                500,
+                "Invalid Zip. Please provide a valid zip code."
+            );
         }
     }
 
