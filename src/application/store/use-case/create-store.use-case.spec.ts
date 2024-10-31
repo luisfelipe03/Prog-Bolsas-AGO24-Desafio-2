@@ -1,10 +1,11 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { CreateStoreUseCase } from "./create-store.use-case";
 import { StoreInMemoryRepository } from "../../../infra/repositories/In-Memory/store-in-memory.repository";
-import { ZodError } from "zod";
+import { InvalidZipError } from "../../../application/store/use-case/errors/invalid-zip-error";
 
 let repository: StoreInMemoryRepository;
 let createStoreUseCase: CreateStoreUseCase;
+
 describe("CreateStoreUseCase", () => {
     beforeAll(() => {
         repository = new StoreInMemoryRepository();
@@ -25,43 +26,26 @@ describe("CreateStoreUseCase", () => {
     });
 
     it("should throw an error if the store name is empty", async () => {
-        try {
-            await createStoreUseCase.execute({
-                name: "",
-                phone: "(81) 99478-5412",
-                zip: "55296630",
-            });
-        } catch (error) {
-            expect(error).toBeInstanceOf(ZodError);
-        }
+        await expect(createStoreUseCase.execute({
+            name: "",
+            phone: "(81) 99478-5412",
+            zip: "55296630",
+        })).rejects.toThrow("Name is required");
     });
 
     it("should throw an error if the store phone is empty", async () => {
-        try {
-            await createStoreUseCase.execute({
-                name: "Store 1",
-                phone: "",
-                zip: "55296630",
-            });
-        } catch (error) {
-            expect(error).toBeInstanceOf(Error);
-            expect(error).toHaveProperty(
-                "message",
-                "Store phone cannot be empty"
-            );
-        }
+        await expect(createStoreUseCase.execute({
+            name: "Store 1",
+            phone: "",
+            zip: "55296630",
+        })).rejects.toThrow("Store phone cannot be empty");
     });
 
     it("should throw an error if the store zip is empty", async () => {
-        try {
-            await createStoreUseCase.execute({
-                name: "Store 1",
-                phone: "(81) 99478-5412",
-                zip: "",
-            });
-        } catch (error) {
-            expect(error).toBeInstanceOf(Error);
-            expect(error).toHaveProperty("message", "Invalid Zip. Please provide a valid zip code.");
-        }
+        await expect(createStoreUseCase.execute({
+            name: "Store 1",
+            phone: "(81) 99478-5412",
+            zip: "",
+        })).rejects.toThrow(new InvalidZipError());
     });
 });

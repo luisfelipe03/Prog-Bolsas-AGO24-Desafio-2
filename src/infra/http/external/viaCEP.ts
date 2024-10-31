@@ -4,7 +4,7 @@ import { Address } from "../../../domain/store/store.entity";
 import { getCoordinatesByAddress } from "./googleGeocoding";
 import { InvalidZipError } from "../../../application/store/use-case/errors/invalid-zip-error";
 
-function validateViaCEPResponse(data: any): data is {
+type ViaCEPResponse = {
     cep: string;
     logradouro: string;
     complemento?: string;
@@ -12,7 +12,9 @@ function validateViaCEPResponse(data: any): data is {
     localidade: string;
     uf: string;
     erro?: boolean | string;
-} {
+};
+
+function validateViaCEPResponse(data: any): data is ViaCEPResponse {
     return (
         typeof data === "object" &&
         data !== null &&
@@ -28,15 +30,13 @@ function validateViaCEPResponse(data: any): data is {
 export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
     const cleanedCep = cep.replace(/\D/g, "");
 
-    if (!cleanedCep || cleanedCep.length !== 8 || !/^\d{8}$/.test(cleanedCep)) {
+    if (!cleanedCep || cleanedCep.length !== 8) {
         logger.error("Invalid or empty CEP");
         throw new InvalidZipError();
     }
 
     try {
-        const response = await fetch(
-            `https://viacep.com.br/ws/${cleanedCep}/json/`
-        );
+        const response = await fetch(`https://viacep.com.br/ws/${cleanedCep}/json/`);
 
         if (!response.ok) {
             logger.error(`Error in ViaCEP request: Status ${response.status}`);
@@ -45,22 +45,8 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
 
         const data = await response.json();
 
-        const viaCepData = data as {
-            cep: string;
-            logradouro: string;
-            complemento?: string;
-            bairro: string;
-            localidade: string;
-            uf: string;
-            erro?: boolean | string;
-        };
-        if (viaCepData && (viaCepData.erro === true || viaCepData.erro === "true")) {
+        if (!validateViaCEPResponse(data) || (data.erro === true || data.erro === "true")) {
             logger.warn(`CEP not found or invalid: ${cep}`);
-            return null;
-        }
-
-        if (!validateViaCEPResponse(data)) {
-            logger.error("Invalid ViaCEP response structure");
             return null;
         }
 
@@ -77,9 +63,7 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
         const latLng = await getCoordinatesByAddress(addressString);
 
         if (!latLng) {
-            throw new Error(
-                `Coordinates not found for address: ${addressString}`
-            );
+            throw new Error(`Coordinates not found for address: ${addressString}`);
         }
 
         return {
@@ -91,7 +75,7 @@ export const getAddressByCEP = async (cep: string): Promise<Address | null> => {
             latLng,
         };
     } catch (error) {
-        logger.error("Error searching for nearby stores");
+        logger.error(`Error searching for address with CEP ${cep}:`, error);
         return null;
     }
 };

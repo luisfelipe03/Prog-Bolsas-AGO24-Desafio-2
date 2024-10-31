@@ -19,7 +19,6 @@ Este projeto é uma aplicação em TypeScript para localizar lojas em um raio de
 - **Vitest**
 - **Winston**
 - **DotEnv**
-- **Zod**
 - **APIs Externas**: ViaCEP, Google Geocoding
 - **MongoDB e SQLite** (opcional, poderia ser substituído pelo modulo Net do proprio Node.js para realizar a conexão com o banco de dados)
 - **Swagger** para documentação
