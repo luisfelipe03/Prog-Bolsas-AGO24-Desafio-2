@@ -1,22 +1,31 @@
 import fetch from "node-fetch";
-import { z } from "zod";
 import { env } from "../../config/env";
 import { LatLng } from "../../../domain/store/store.entity";
 import logger from "../../config/logger";
 
-const googleGeocodingResponseSchema = z.object({
-    results: z.array(
-        z.object({
-            geometry: z.object({
-                location: z.object({
-                    lat: z.number(),
-                    lng: z.number(),
-                }),
-            }),
-        })
-    ),
-    status: z.string(),
-});
+function validateGoogleGeocodingResponse(data: any): data is { results: { geometry: { location: LatLng } }[]; status: string } {
+    if (
+        typeof data !== "object" ||
+        !Array.isArray(data.results) ||
+        typeof data.status !== "string"
+    ) {
+        return false;
+    }
+
+    for (const result of data.results) {
+        if (
+            typeof result !== "object" ||
+            typeof result.geometry !== "object" ||
+            typeof result.geometry.location !== "object" ||
+            typeof result.geometry.location.lat !== "number" ||
+            typeof result.geometry.location.lng !== "number"
+        ) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 export const getCoordinatesByAddress = async (
     address: string
@@ -29,32 +38,21 @@ export const getCoordinatesByAddress = async (
         );
         const data = await response.json();
 
-        const parsedData = googleGeocodingResponseSchema.safeParse(data);
+        if (!validateGoogleGeocodingResponse(data)) {
+            logger.error("Erro na validação dos dados da API Google.");
+            return null;
+        }
 
-        if (!parsedData.success) {
+        if (data.status !== "OK" || data.results.length === 0) {
             logger.error(
-                "Erro na validação dos dados da API Google:",
-                parsedData.error
+                "Erro: Nenhum resultado encontrado ou problema com a requisição."
             );
             return null;
         }
 
-        if (
-            parsedData.data.status !== "OK" ||
-            parsedData.data.results.length === 0
-        ) {
-            logger.error(
-                "Erro: Nenhum resultado encontrado ou problema com a requisição"
-            );
-            return null;
-        }
+        const { lat, lng } = data.results[0].geometry.location;
 
-        const { lat, lng } = parsedData.data.results[0].geometry.location;
-
-        return {
-            lat: lat,
-            lng: lng,
-        };
+        return { lat, lng };
     } catch (error) {
         logger.error("Erro ao buscar as coordenadas:", error);
         return null;

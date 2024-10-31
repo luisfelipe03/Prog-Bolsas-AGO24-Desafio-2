@@ -1,4 +1,3 @@
-import { number } from "zod";
 import { Store } from "../../../domain/store/store.entity";
 import { StoreRepositoryInterface } from "../../../domain/store/store.repository";
 import { CreateStoreOutput } from "../dto/create-store-output.dto";
