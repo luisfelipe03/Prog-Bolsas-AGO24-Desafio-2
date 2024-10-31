@@ -9,14 +9,15 @@ export class StoreMongoRepository implements StoreRepositoryInterface {
         await client.db().collection("stores").insertOne(store);
     }
 
-    async findAll(page?: number): Promise<Store[]> {
-        const ITEMS_PER_PAGE = 10;
+    async findAll(page?: number, limit?: number): Promise<Store[]> {
+        const currentPage = page || 1; 
+        const currentLimit = limit || 10; 
 
         const query = client.db().collection("stores").find();
 
         if (page) {
-            const skip = (page - 1) * ITEMS_PER_PAGE;
-            query.skip(skip).limit(ITEMS_PER_PAGE);
+            const skip = (currentPage - 1) * currentLimit;
+            query.skip(skip).limit(currentLimit);
         }
 
         const stores = await query.toArray();

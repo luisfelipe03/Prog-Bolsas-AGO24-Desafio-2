@@ -10,9 +10,16 @@ export class StoreInMemoryRepository implements StoreRepositoryInterface {
         this.stores.push(store);
     }
 
-    async findAll(page?: number): Promise<Store[]> {
-        return page ? this.stores.slice((page - 1) * 10, page * 10): this.stores;
+    async findAll(page?: number, limit?: number): Promise<Store[]> {
+        const currentPage = page || 1; 
+        const currentLimit = limit || 10; 
+    
+        const startIndex = (currentPage - 1) * currentLimit;
+        const endIndex = startIndex + currentLimit;
+    
+        return this.stores.slice(startIndex, endIndex);
     }
+    
 
     async findById(id: string): Promise<Store | undefined> {
         return this.stores.find((store) => store.id === id);
