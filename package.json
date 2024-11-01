@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/infra/http/express/server.ts",
+    "build": "tsc",
     "start": "node build/infra/http/express/server.js",
     "test": "vitest run",
     "test:watch": "vitest"
