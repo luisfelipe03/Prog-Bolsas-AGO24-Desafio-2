@@ -14,12 +14,6 @@ const handleResponse = (res: Response, statusCode: number, message: any) => {
 };
 
 export class StoreController {
-    /**
-     * Binding de Métodos:
-     * Os métodos do controlador (createStore, listAllStore, findStoreById, etc.) são vinculados ao contexto da instância da classe (this).
-     * Isso é crucial porque, em JavaScript, o valor de this pode mudar dependendo de como uma função é chamada.
-     * Ao usar .bind(this), você garante que this dentro desses métodos sempre se refira à instância da classe StoreController.
-     */
     constructor(private repository: StoreRepositoryInterface) {
         this.createStore = this.createStore.bind(this);
         this.listAllStore = this.listAllStore.bind(this);

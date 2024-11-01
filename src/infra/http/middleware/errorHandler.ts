@@ -3,9 +3,7 @@ import logger from "../../config/logger";
 
 const errorHandler = (
     err: Error,
-    req: Request,
     res: Response,
-    next: NextFunction
 ) => {
     logger.error(err.message, { stack: err.stack });
 

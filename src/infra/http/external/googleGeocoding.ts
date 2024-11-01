@@ -39,14 +39,12 @@ export const getCoordinatesByAddress = async (
         const data = await response.json();
 
         if (!validateGoogleGeocodingResponse(data)) {
-            logger.error("Erro na validação dos dados da API Google.");
+            logger.error("Error validating Google API data.");
             return null;
         }
 
         if (data.status !== "OK" || data.results.length === 0) {
-            logger.error(
-                "Erro: Nenhum resultado encontrado ou problema com a requisição."
-            );
+            logger.error("Error: No results found or issue with the request.");
             return null;
         }
 
@@ -54,7 +52,7 @@ export const getCoordinatesByAddress = async (
 
         return { lat, lng };
     } catch (error) {
-        logger.error("Erro ao buscar as coordenadas:", error);
+        logger.error("Error fetching coordinates:", error);
         return null;
     }
 };

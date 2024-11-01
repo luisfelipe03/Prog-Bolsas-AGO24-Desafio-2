@@ -30,7 +30,7 @@ export class CreateStoreUseCase {
 
     private mapToOutput(store: Store): CreateStoreOutput {
         return {
-            id: store.id, // Supondo que a entidade Store tenha uma propriedade 'id'
+            id: store.id, 
             name: store.name,
             phone: store.phone,
             address: {
