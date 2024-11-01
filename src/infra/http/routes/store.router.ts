@@ -8,7 +8,7 @@ import { StoreMongoRepository } from "../../repositories/MongoDB/store-mongo.rep
 const storeRouter = Router();
 
 // Lembrar de executar a função de conexão com o mongo quando usar o StoreMongoRepository
-const repository = new StoreSqliteRepository();
+const repository = new StoreInMemoryRepository();
 repository.runSeed();
 
 const storeController = new StoreController(repository);
